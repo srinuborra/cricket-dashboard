@@ -1,88 +1,88 @@
 const http = require("http");
-const https = require("https");
+
+const matches = [
+    { name: "RCB vs MI", status: "🔴 LIVE - RCB 150/3 (16 overs)" },
+    { name: "CSK vs GT", status: "🟡 Today 7:30 PM" },
+    { name: "SRH vs KKR", status: "🔵 Tomorrow" }
+];
 
 const server = http.createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/html" });
 
-    https.get("https://api.cricapi.com/v1/matches?apikey=demo", (apiRes) => {
-        let data = "";
-
-        apiRes.on("data", chunk => data += chunk);
-
-        apiRes.on("end", () => {
-            let html = `
-            <html>
-            <head>
-                <title>Live Cricket Dashboard</title>
-                <meta http-equiv="refresh" content="10">
-                <style>
-                    body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
-                    .card { background:#1e293b; margin:20px auto; padding:20px; width:320px; border-radius:10px; }
-                    h1 { color:#22c55e; }
-                </style>
-            </head>
-            <body>
-                <h1>🏏 Live Cricket Dashboard</h1>
-            `;
-
-            try {
-                const json = JSON.parse(data);
-
-                if (json.data && json.data.length > 0) {
-                    json.data.slice(0, 3).forEach(match => {
-                        html += `
-                        <div class="card">
-                            <h3>${match.name || "Match"}</h3>
-                            <p>${match.status || "No status"}</p>
-                        </div>
-                        `;
-                    });
-                } else {
-                    // fallback data
-                    const fallback = [
-                        { name: "RCB vs MI", status: "Live - RCB 150/3" },
-                        { name: "CSK vs GT", status: "Today 7:30 PM" },
-                        { name: "SRH vs KKR", status: "Tomorrow" }
-                    ];
-
-                    fallback.forEach(match => {
-                        html += `
-                        <div class="card">
-                            <h3>${match.name}</h3>
-                            <p>${match.status}</p>
-                        </div>
-                        `;
-                    });
-                }
-
-            } catch (e) {
-                html += `<p>API Error - Showing demo data</p>`;
-
-                const fallback = [
-                    { name: "RCB vs MI", status: "Live - RCB 150/3" },
-                    { name: "CSK vs GT", status: "Today 7:30 PM" },
-                    { name: "SRH vs KKR", status: "Tomorrow" }
-                ];
-
-                fallback.forEach(match => {
-                    html += `
-                    <div class="card">
-                        <h3>${match.name}</h3>
-                        <p>${match.status}</p>
-                    </div>
-                    `;
-                });
+    let html = `
+    <html>
+    <head>
+        <title>Cricket Dashboard</title>
+        <meta http-equiv="refresh" content="10">
+        <style>
+            body {
+                margin: 0;
+                font-family: 'Segoe UI';
+                background: linear-gradient(to right, #0f172a, #1e293b);
+                color: white;
+                text-align: center;
             }
 
-            html += "</body></html>";
-            res.end(html);
-        });
+            h1 {
+                padding: 20px;
+                color: #22c55e;
+            }
 
-    }).on("error", () => {
-        res.end("<h1>API Connection Error</h1>");
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .card {
+                background: #111827;
+                padding: 20px;
+                width: 320px;
+                border-radius: 15px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                transition: transform 0.2s;
+            }
+
+            .card:hover {
+                transform: scale(1.05);
+            }
+
+            .match {
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .status {
+                margin-top: 10px;
+                font-size: 16px;
+                color: #9ca3af;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🏏 Live Cricket Dashboard</h1>
+        <div class="container">
+    `;
+
+    matches.forEach(m => {
+        html += `
+        <div class="card">
+            <div class="match">${m.name}</div>
+            <div class="status">${m.status}</div>
+        </div>
+        `;
     });
+
+    html += `
+        </div>
+    </body>
+    </html>
+    `;
+
+    res.end(html);
 });
 
 server.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+    console.log("Server running...");
 });
